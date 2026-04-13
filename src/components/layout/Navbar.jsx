@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import useMobileMenu from '../../hooks/useMobileMenu';
+import resumeFile from '../../assets/Pranay_Charde_Resume_ATS.docx';
 
 function Navbar() {
   const { isOpen, toggleMenu, closeMenu } = useMobileMenu();
@@ -56,7 +57,7 @@ function Navbar() {
             ))}
             <li>
               <a 
-                href="/resume.pdf" 
+                href={resumeFile} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="btn-primary py-2 px-4 rounded-lg text-sm"
@@ -96,7 +97,7 @@ function Navbar() {
             </a>
           ))}
           <a 
-            href="/resume.pdf" 
+            href={resumeFile} 
             target="_blank" 
             rel="noopener noreferrer"
             className="btn-primary w-full max-w-xs text-center"
