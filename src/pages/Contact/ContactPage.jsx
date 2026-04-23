@@ -1,142 +1,181 @@
-import { motion } from 'framer-motion';
-import { Mail, MapPin, Github, Linkedin, Send, Phone } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { MapPin, Mail, Phone, Linkedin, Github } from 'lucide-react';
+import api from '../../api';
 
 function ContactPage() {
-  const handleSubmit = (e) => {
+  const revealRefs = useRef([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phoneno: '',
+    message: ''
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  // 👇 REMOVE API CALL FROM HERE ❌
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.1 }
+    );
+
+    revealRefs.current.forEach(el => el && io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  const addRef = (el) => {
+    if (el && !revealRefs.current.includes(el)) {
+      revealRefs.current.push(el);
+    }
+  };
+
+  // ✅ API CALL HERE
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    alert("Message sent! (Demo)");
+
+    try {
+      const res = await api.post('/contact', formData);
+      // console.log("Response:", res.data);
+
+      setSubmitted(true);
+
+      setFormData({
+        name: '',
+        email: '',
+        phoneno: '',
+        message: ''
+      });
+
+      setTimeout(() => setSubmitted(false), 3000);
+
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+    }
   };
 
   return (
-    <section id="contact" className="section-padding bg-white relative overflow-hidden">
-      {/* Decorative Background */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50 -z-10 skew-x-12 translate-x-32"></div>
+    <section id="contact" className="section-pad">
 
-      <div className="container-custom">
-        <motion.div 
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="heading-xl mb-4 text-slate-800">Get In Touch</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto text-lg">
-            Have a project in mind or want to discuss new opportunities? I'd love to hear from you.
-          </p>
-          <div className="w-24 h-1 bg-primary-600 mx-auto rounded-full mt-6"></div>
-        </motion.div>
+      <div className="contact-grid">
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Contact Info */}
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h3 className="heading-lg mb-8 text-slate-800">Contact Information</h3>
+        {/* FORM & HERO */}
+        <div className="contact-form-side reveal-up" ref={addRef}>
+          <h2 className="contact-hero-text">
+            LET'S WORK<br />TOGETHER
+          </h2>
+          <form onSubmit={handleSubmit}>
             
-            <div className="space-y-8">
-              <div className="flex items-start">
-                <div className="p-4 bg-primary-50 rounded-xl text-primary-600 mr-6">
-                  <MapPin size={28} />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-slate-800 mb-1">Location</h4>
-                  <p className="text-slate-600 text-lg">Nagpur, Maharashtra, India</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="p-4 bg-primary-50 rounded-xl text-primary-600 mr-6">
-                  <Mail size={28} />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-slate-800 mb-1">Email</h4>
-                  <a href="mailto:pranaycharde13@gmail.com" className="text-slate-600 text-lg hover:text-primary-600 transition-colors">
-                    pranaycharde13@gmail.com
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="p-4 bg-primary-50 rounded-xl text-primary-600 mr-6">
-                  <Phone size={28} />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-slate-800 mb-1">Phone</h4>
-                  <a href="tel:+919766329536" className="text-slate-600 text-lg hover:text-primary-600 transition-colors">
-                    +91-9766329536
-                  </a>
-                </div>
-              </div>
-
-               <div className="flex items-start">
-                <div className="p-4 bg-primary-50 rounded-xl text-primary-600 mr-6">
-                  <Linkedin size={28} />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold text-slate-800 mb-1">LinkedIn</h4>
-                  <a href="https://www.linkedin.com/in/pranaycharde13" target="_blank" rel="noopener noreferrer" className="text-slate-600 text-lg hover:text-primary-600 transition-colors">
-                    linkedin.com/in/pranaycharde13
-                  </a>
-                </div>
-              </div>
+            <div className="form-field">
+              <input
+                type="text"
+                placeholder="enter your name"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
             </div>
 
-            <div className="mt-12">
-               <h4 className="text-lg font-semibold text-slate-800 mb-4">Follow Me</h4>
-               <div className="flex gap-4">
-                 <a href="https://github.com/PranayCharde" target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-100 rounded-full text-slate-600 hover:bg-primary-600 hover:text-white transition-all duration-300 transform hover:-translate-y-1">
-                   <Github size={24} />
-                 </a>
-                 <a href="https://www.linkedin.com/in/pranaycharde13" target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-100 rounded-full text-slate-600 hover:bg-primary-600 hover:text-white transition-all duration-300 transform hover:-translate-y-1">
-                   <Linkedin size={24} />
-                 </a>
-               </div>
+            <div className="form-field">
+              <input
+                type="email"
+                placeholder="enter your email"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
             </div>
-          </motion.div>
 
-          {/* Contact Form */}
-          <motion.div 
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100"
-          >
-            <h3 className="heading-lg mb-6 text-slate-800">Send a Message</h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">Name</label>
-                  <input type="text" id="name" className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="John Doe" required />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                  <input type="email" id="email" className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="john@example.com" required />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-slate-700 mb-2">Subject</label>
-                <input type="text" id="subject" className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all" placeholder="Project Inquiry" required />
-              </div>
+            <div className="form-field">
+              <input
+                type="number"
+                placeholder="enter your number"
+                value={formData.phoneno}
+                onChange={e => setFormData({ ...formData, phoneno: e.target.value })}
+              />
+            </div>
 
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-2">Message</label>
-                <textarea id="message" rows="5" className="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all resize-none" placeholder="Tell me about your project..." required></textarea>
-              </div>
+            <div className="form-field">
+              <textarea
+                placeholder="enter your message"
+                value={formData.message}
+                onChange={e => setFormData({ ...formData, message: e.target.value })}
+                required
+              />
+            </div>
 
-              <button type="submit" className="w-full btn btn-primary flex justify-center items-center gap-2 group">
-                Send Message
-                <Send size={18} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </form>
-          </motion.div>
+            <button type="submit" className="submit-btn">
+              {submitted ? 'Message Sent ✓' : 'Send Message'}
+            </button>
+
+          </form>
         </div>
+
+        {/* CONTACT INFO */}
+        <div className="contact-info-section reveal-up" ref={addRef}>
+          <h3 className="contact-info-title">Contact Information</h3>
+          
+          <div className="info-items">
+            <div className="info-item">
+              <div className="info-icon-box">
+                <MapPin size={22} />
+              </div>
+              <div className="info-text">
+                <h3>Location</h3>
+                <p>Nagpur, Maharashtra, India</p>
+              </div>
+            </div>
+
+            <div className="info-item">
+              <div className="info-icon-box">
+                <Mail size={22} />
+              </div>
+              <div className="info-text">
+                <h3>Email</h3>
+                <a href="mailto:pranaycharde13@gmail.com">pranaycharde13@gmail.com</a>
+              </div>
+            </div>
+
+            <div className="info-item">
+              <div className="info-icon-box">
+                <Phone size={22} />
+              </div>
+              <div className="info-text">
+                <h3>Phone</h3>
+                <a href="tel:+919766329536">+91-9766329536</a>
+              </div>
+            </div>
+
+            <div className="info-item">
+              <div className="info-icon-box">
+                <Linkedin size={22} />
+              </div>
+              <div className="info-text">
+                <h3>LinkedIn</h3>
+                <a href="https://linkedin.com/in/pranaycharde13" target="_blank" rel="noopener noreferrer">
+                  linkedin.com/in/pranaycharde13
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="follow-me">
+            <h4>Follow Me</h4>
+            <div className="social-links">
+              <a href="https://github.com/pranaycharde" target="_blank" rel="noopener noreferrer" className="social-btn">
+                <Github size={20} />
+              </a>
+              <a href="https://linkedin.com/in/pranaycharde13" target="_blank" rel="noopener noreferrer" className="social-btn">
+                <Linkedin size={20} />
+              </a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   );

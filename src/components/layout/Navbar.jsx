@@ -1,113 +1,103 @@
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import useMobileMenu from '../../hooks/useMobileMenu';
 import resumeFile from '../../assets/Pranay_Charde_Resume_ATS.docx';
 
 function Navbar() {
-  const { isOpen, toggleMenu, closeMenu } = useMobileMenu();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   const navLinks = [
-    { id: 'home', label: 'Home' },
-    { id: 'about', label: 'About' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'contact', label: 'Contact' }
+    { id: 'home',     num: '', label: 'HOME'     },
+    { id: 'about',    num: '', label: 'ABOUT'    },
+    { id: 'projects', num: '', label: 'WORK'     },
+    { id: 'skills',   num: '', label: 'SKILLS'   },
+    { id: 'contact',  num: '', label: 'CONTACT'  },
   ];
 
+  // Lock scroll when overlay is open
+  useEffect(() => {
+    document.body.style.overflow = overlayOpen ? 'hidden' : '';
+  }, [overlayOpen]);
+
+  const scrollTo = (id) => {
+    setOverlayOpen(false);
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }, 400);
+  };
+
   return (
-    <nav 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-white/90 backdrop-blur-md shadow-md py-3' 
-          : 'bg-transparent py-5'
-      }`}
-    >
-      <div className="container-custom">
-        <div className="flex justify-between items-center">
-          <a href="#home" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400 hover:scale-105 transition-transform duration-300">
-            Pranay
-          </a>
+    <>
+      {/* ─── MAIN NAV ─── */}
+      <nav className="kb-nav">
+        <a href="#home" className="kb-nav-logo" onClick={e => { e.preventDefault(); scrollTo('home'); }}>
+          PC®
+        </a>
 
-          {/* Desktop Menu */}
-          <ul className="hidden md:flex items-center space-x-8">
-            {navLinks.map(link => (
-              <li key={link.id}>
-                <a 
-                  href={`#${link.id}`} 
-                  className="text-slate-600 font-medium hover:text-primary-600 hover:-translate-y-0.5 transition-all duration-300 relative group"
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
-                </a>
-              </li>
-            ))}
-            <li>
-              <a 
-                href={resumeFile} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn-primary py-2 px-4 rounded-lg text-sm"
-              >
-                Resume
-              </a>
-            </li>
-          </ul>
+        {/* Dot-grid menu trigger */}
+        <button
+          className="kb-nav-dots"
+          onClick={() => setOverlayOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <span className="kb-dot" />
+          <span className="kb-dot" />
+          <span className="kb-dot" />
+          <span className="kb-dot" />
+        </button>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-slate-700 hover:text-primary-600 transition-colors p-2"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {/* Resume / Contact CTA */}
+        <a
+          href={resumeFile}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="kb-nav-btn"
+        >
+          RESUME ↗
+        </a>
+      </nav>
+
+      {/* ─── OVERLAY MENU ─── */}
+      <div id="nav-overlay" className={overlayOpen ? 'open' : ''}>
+        {/* Overlay top bar */}
+        <div className="overlay-nav-top">
+          <span className="kb-nav-logo">PC®</span>
+          <button className="overlay-close" onClick={() => setOverlayOpen(false)} aria-label="Close menu">
+            ✕
           </button>
+          <a
+            href="#contact"
+            className="kb-nav-btn"
+            onClick={e => { e.preventDefault(); scrollTo('contact'); }}
+          >
+            CONTACT NOW
+          </a>
         </div>
-      </div>
 
-      {/* Mobile Menu Overlay */}
-      <div 
-        className={`md:hidden fixed inset-0 bg-white z-40 transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        style={{ top: '60px' }}
-      >
-        <div className="flex flex-col items-center justify-center space-y-8 p-8 h-[calc(100vh-60px)]">
+        {/* Big nav links */}
+        <nav className="overlay-links">
           {navLinks.map(link => (
-            <a 
+            <a
               key={link.id}
-              href={`#${link.id}`} 
-              className="text-xl font-semibold text-slate-800 hover:text-primary-600 transition-colors"
-              onClick={closeMenu}
+              href={`#${link.id}`}
+              className="overlay-link"
+              onClick={e => { e.preventDefault(); scrollTo(link.id); }}
             >
+              <span className="link-num">{link.num}</span>
               {link.label}
             </a>
           ))}
-          <a 
-            href={resumeFile} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="btn-primary w-full max-w-xs text-center"
-            onClick={closeMenu}
-          >
-            Download Resume
-          </a>
+        </nav>
+
+        {/* Overlay footer */}
+        <div className="overlay-footer">
+          <span>© {new Date().getFullYear()} ALL RIGHTS RESERVED</span>
+          <div className="overlay-socials">
+            <a href="https://github.com/PranayCharde" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
+            <a href="https://www.linkedin.com/in/pranaycharde13" target="_blank" rel="noopener noreferrer">LINKEDIN ↗</a>
+            <a href="mailto:pranaycharde13@gmail.com">EMAIL ↗</a>
+          </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 }
 
